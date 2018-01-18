@@ -1,0 +1,7 @@
+__pycache__/
+.vscode/
+*env/
+*.pyc
+
+.python-version
+python_hue.json
