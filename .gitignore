@@ -4,4 +4,4 @@ __pycache__/
 *.pyc
 
 .python-version
-python_hue.json
+*.json
