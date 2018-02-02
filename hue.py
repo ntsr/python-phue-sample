@@ -24,7 +24,7 @@ def get_args():
         const=None, \
         default=None, \
         type=str, \
-        choices=None, \
+        choices=['demo', 'show', 'set'], \
         help='Action', \
         metavar=None)
     ap.add_argument('--ip', \
@@ -35,7 +35,8 @@ def get_args():
         type=str, \
         choices=None, \
         help='HomeBridge IP address', \
-        metavar=None)
+        metavar=None, \
+        required=True)
     ap.add_argument('-i', '--light-id', \
         action='store', \
         nargs='?', \
@@ -44,7 +45,8 @@ def get_args():
         type=int, \
         choices=None, \
         help='Light device No.', \
-        metavar=None)
+        metavar=None, \
+        required=True)
     ap.add_argument('--off', \
         action='store_true', \
         help='Light off')
