@@ -18,65 +18,14 @@ conv = Converter()
 
 def get_args():
     ap = argparse.ArgumentParser(description='Philips Hue Developer Tool.')
-    ap.add_argument('action', \
-        action='store', \
-        nargs=None, \
-        const=None, \
-        default=None, \
-        type=str, \
-        choices=['demo', 'show', 'set'], \
-        help='Action', \
-        metavar=None)
-    ap.add_argument('--ip', \
-        action='store', \
-        nargs='?', \
-        const=None, \
-        default=None, \
-        type=str, \
-        choices=None, \
-        help='HomeBridge IP address', \
-        metavar=None, \
-        required=True)
-    ap.add_argument('-i', '--light-id', \
-        action='store', \
-        nargs='?', \
-        const=None, \
-        default=None, \
-        type=int, \
-        choices=None, \
-        help='Light device No.', \
-        metavar=None, \
-        required=True)
-    ap.add_argument('--off', \
-        action='store_true', \
-        help='Light off')
-    ap.add_argument('-b', '--bri', \
-        action='store', \
-        nargs='?', \
-        const=None, \
-        default=None, \
-        type=int, \
-        choices=None, \
-        help='Brightness', \
-        metavar=None)
-    ap.add_argument('-c', '--color-rgb-hex', \
-        action='store', \
-        nargs='?', \
-        const=None, \
-        default=None, \
-        type=str, \
-        choices=None, \
-        help='Color RGB Hex: RRGGBB', \
-        metavar=None)
-    ap.add_argument('--config-file-path',\
-        action='store', \
-        nargs='?', \
-        const=None, \
-        default=DEFAULT_CONFIG_FILE_PATH, \
-        type=str, \
-        choices=None, \
-        help='Config file path', \
-        metavar=None)
+    ap.add_argument('action', choices=['demo', 'show', 'set'], help='Action')
+    ap.add_argument('--ip', help='HomeBridge IP address', required=True)
+    ap.add_argument('-i', '--light-id', type=int, help='Light device No. (1 origin)', required=True)
+    ap.add_argument('--off', action='store_true', help='Light off (with set action)')
+    ap.add_argument('-b', '--bri', type=int, help='Brightness (0-255)')
+    ap.add_argument('-c', '--color-rgb-hex', help='Color RGB Hex (ex: 3e982c)')
+    ap.add_argument('--color-rgb', nargs=3, type=int, help='Color RGB (0-255)')
+    ap.add_argument('--config-file-path', default=DEFAULT_CONFIG_FILE_PATH, help='Config file path')
 
     args = ap.parse_args()
 
@@ -131,7 +80,8 @@ def main():
         on = not args.off
         bri = args.bri
         rgb_hex = args.color_rgb_hex
-        set_hue(light, on, bri, rgb_hex)
+        rgb = args.color_rgb
+        set_hue(light, on, bri, rgb_hex, rgb)
     else:
         demo(light)
 
@@ -151,8 +101,8 @@ def show_hue(light):
                 color_rgb = conv.xy_to_rgb(*xy, bri=bri)
                 color_hex = conv.xy_to_hex(*xy, bri=bri)
 
-            print("id:{}\t{}\tbri:{}\thex:{}\txy:{}".format(
-                light_id, on, bri, color_hex, xy))
+            print("id:{}\t{}\tbri:{}\thex:{}\trgb:{}\txy:{}".format(
+                light_id, on, bri, color_hex, color_rgb, xy))
             time.sleep(GET_INTERVAL) 
 
         except KeyboardInterrupt:
@@ -161,7 +111,7 @@ def show_hue(light):
     print('end')
 
 
-def set_hue(light, on=None, bri=None, rgb_hex=None):
+def set_hue(light, on=None, bri=None, rgb_hex=None, rgb=[]):
     if isinstance(on, bool):
         light.on = on
 
@@ -174,7 +124,12 @@ def set_hue(light, on=None, bri=None, rgb_hex=None):
             light.xy = (x, y)
         except:
             print('Invalid rgb_hex!: {}'.format(rgb_hex))
-
+    elif rgb and len(rgb) == 3:
+        try:
+            x, y = conv.rgb_to_xy(rgb[0], rgb[1], rgb[2])
+            light.xy = (x, y)
+        except:
+            print('Invalid rgb!: {}'.format(rgb))
 
 def demo(light):
     color_hex = '0000ff'
